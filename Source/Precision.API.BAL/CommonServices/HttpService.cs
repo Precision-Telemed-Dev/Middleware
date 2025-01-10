@@ -1,5 +1,6 @@
 ﻿using Precision.API.BAL.CommonServices.Interfaces;
 using Precision.API.Model.Common;
+using System.Net.Http.Headers;
 
 namespace Precision.API.BAL.CommonServices
 {
@@ -30,5 +31,23 @@ namespace Precision.API.BAL.CommonServices
 
             return response;
         }
-    }
+        public async Task<HttpResponseMessage?> GetRequest(LabCredential credential, string _resource, string processedFilePath, string _id)
+        {
+            await _common.CreateOrAppendFile(processedFilePath, string.Concat("- Get ", _resource, " (", _id, ")"));
+
+            var client = new HttpClient();
+
+            var authenticationString = $"{credential.Username}:{credential.Password}";
+            var base64EncodedAuthenticationString = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(authenticationString));
+
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", base64EncodedAuthenticationString);
+            client.DefaultRequestHeaders
+              .Accept
+              .Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await client.GetAsync(string.Concat(credential.Url, "/", _id));
+
+            return response;
+        }
+    }    
 }
