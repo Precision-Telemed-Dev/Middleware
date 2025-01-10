@@ -45,14 +45,15 @@ namespace Precision.API.Controllers
 
         [TypeFilter(typeof(AuthorizationFilterAttribute))]
         [HttpPost]
-        public async Task<ActionResult> Post([FromHeader] string username, [FromHeader] string password, [FromBody] Order order)
+        [Route("Lab/CreateOrder")]
+        public async Task<ActionResult> CreateOrder([FromHeader] string username, [FromHeader] string password, [FromBody] Order order)
         {
             HttpResponseMessage response = new HttpResponseMessage();
 
             try
             {
                 await _common.CreateOrAppendFile(processedFilePath, String.Concat("------------- " 
-                    + module.ToString() + " - " + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
+                    + module.ToString() + " - " + LabResource.CreateOrder.ToString() + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
                 await _common.CreateOrAppendFile(processedFilePath, System.Text.Json.JsonSerializer.Serialize(order));
 
                 if (string.IsNullOrEmpty(AuthorizeSession.accessToken))
@@ -60,15 +61,15 @@ namespace Precision.API.Controllers
 
                 credential.SessionKey = AuthorizeSession.accessToken;
 
-                //if (response.IsSuccessStatusCode)
-                    // Save Order
+                if (response.IsSuccessStatusCode)
+                    response = await _baseService.Save(order, processedFilePath, credential, LabResource.CreateOrder);
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     response = await AuthorizeSession.Authorize(credential);
 
-                    //if (response.IsSuccessStatusCode)
-                    // Save Order
+                    if (response.IsSuccessStatusCode)
+                        response = await _baseService.Save(order, processedFilePath, credential, LabResource.CreateOrder);
                 }
             }
             catch (Exception ex)

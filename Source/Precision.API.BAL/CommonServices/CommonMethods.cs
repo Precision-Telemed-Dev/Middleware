@@ -44,5 +44,27 @@ namespace Precision.API.BAL.CommonServices
                 throw;
             }
         }
+        public void WriteProfile(string profileName, string keyId, string secret)
+        {
+            Console.WriteLine($"Create the [{profileName}] profile...");
+            var options = new CredentialProfileOptions
+            {
+                AccessKey = keyId,
+                SecretKey = secret
+            };
+            var profile = new CredentialProfile(profileName, options);
+            var sharedFile = new SharedCredentialsFile();
+            sharedFile.RegisterProfile(profile);
+        }
+        public void AddRegion(string profileName, RegionEndpoint region)
+        {
+            var sharedFile = new SharedCredentialsFile();
+            CredentialProfile profile;
+            if (sharedFile.TryGetProfile(profileName, out profile))
+            {
+                profile.Region = region;
+                sharedFile.RegisterProfile(profile);
+            }
+        }
     }
 }
