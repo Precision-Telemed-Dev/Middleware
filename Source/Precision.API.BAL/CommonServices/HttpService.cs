@@ -31,9 +31,9 @@ namespace Precision.API.BAL.CommonServices
 
             return response;
         }
-        public async Task<HttpResponseMessage?> GetRequest(LabCredential credential, string _resource, string processedFilePath, string _id)
+        public async Task<HttpResponseMessage?> GetRequest(LabCredential credential, string action, string processedFilePath, string _id)
         {
-            await _common.CreateOrAppendFile(processedFilePath, string.Concat("- Get ", _resource, " (", _id, ")"));
+            await _common.CreateOrAppendFile(processedFilePath, string.Concat("- Get ", action, " (", _id, ")"));
 
             var client = new HttpClient();
 
@@ -45,7 +45,7 @@ namespace Precision.API.BAL.CommonServices
               .Accept
               .Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var response = await client.GetAsync(string.Concat(credential.Url, "/", _id));
+            var response = await client.GetAsync(string.Concat(credential.Url, _id));
 
             return response;
         }

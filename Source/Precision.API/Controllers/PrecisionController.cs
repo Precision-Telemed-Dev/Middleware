@@ -7,6 +7,8 @@ using System.Net;
 using Precision.API.Model.LabInfo;
 using Precision.API.BAL.LabServices.Interfaces;
 using Precision.Authorization;
+using Amazon.Auth.AccessControlPolicy;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Precision.API.Controllers
 {
@@ -90,12 +92,13 @@ namespace Precision.API.Controllers
 
         [TypeFilter(typeof(AuthorizationFilterAttribute))]
         [HttpGet]
-        [Route("{id}")]
-        public async Task<ActionResult> Get([FromHeader] string username, [FromHeader] string password, string id)
+        [Route("Pharmacy/ReadStatus/{rxnumber}")]
+        public async Task<ActionResult> ReadStatus([FromHeader] string username, [FromHeader] string password, string rxnumber)
         {
             credential.Username = _configuration.GetValue<string>("PharUsername");
             credential.Password = _configuration.GetValue<string>("PharPassword");
             credential.Url = _configuration.GetValue<string>("PharUrl");
+            credential.Url = string.Concat(credential.Url, "status/");
 
             exceptionFilePath = string.Concat(_path, Module.Pharmacy.ToString(), "\\Exceptions\\", "Exception_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
             processedFilePath = string.Concat(_path, Module.Pharmacy.ToString(), "\\Processed\\", "Processed_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
@@ -105,10 +108,10 @@ namespace Precision.API.Controllers
             try
             {
                 await _common.CreateOrAppendFile(processedFilePath, String.Concat("------------- "
-                   + module.ToString() + " - " + PharmacyResource.GetStatus.ToString() + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
-                await _common.CreateOrAppendFile(processedFilePath, String.Concat("Id: ", id));
+                    + Actions.PharmacyReadStatus.ToString() + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
+                await _common.CreateOrAppendFile(processedFilePath, String.Concat("RxNumber: ", rxnumber));
 
-                //response = await _baseService.Get(processedFilePath, credential, id, fhirResource);
+                response = await _baseService.Get(processedFilePath, credential, rxnumber, Actions.PharmacyReadStatus);
             }
             catch (Exception ex)
             {
@@ -117,10 +120,11 @@ namespace Precision.API.Controllers
             }
 
             await _common.CreateOrAppendFile(processedFilePath, string.Concat(DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), " -> ",
-                    " StatusCode = ", response.StatusCode, " (", (int)response.StatusCode, "), ReasonPhrase = ", response.ReasonPhrase));
+                    " StatusCode = ", response.StatusCode, " (", (int)response.StatusCode, "), ReasonPhrase = ", response.ReasonPhrase,
+                    ", Content = ", response.Content != null ? response.Content.ReadAsStringAsync().Result: string.Empty));
 
             return StatusCode(Convert.ToInt32(response.StatusCode)
-                , (response.StatusCode != HttpStatusCode.InternalServerError) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase);
+                , (response.IsSuccessStatusCode) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase);
         }
     }
 }
