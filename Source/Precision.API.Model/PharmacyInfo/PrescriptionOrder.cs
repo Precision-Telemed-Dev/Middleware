@@ -9,7 +9,7 @@
             prescriber = new Prescriber();
             patient = new Patient();
         }
-        public string? requestType { get; set; }
+        //public string? requestType { get; set; }
         public string referenceId { get; set; }
         public Prescription prescription { get; set; }
         public PrescriptionTransferDetails prescriptionTransferDetails { get; set; }

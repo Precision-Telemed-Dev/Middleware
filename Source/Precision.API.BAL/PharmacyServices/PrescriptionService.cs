@@ -18,7 +18,9 @@ namespace Precision.API.BAL.PharmacyServices
         }
         public async Task<string> GenerateJson(Precision.API.Model.PharmacyInfo.PrescriptionOrder order, string processedFilePath, string id, Actions action)
         {
-            return JsonConvert.SerializeObject(order);
+            string json = JsonConvert.SerializeObject(order);
+
+            return json.Replace("{\"referenceId\"", "{\"requestType\":\"create\",\"referenceId\"");
         }
     }
 }
