@@ -1,6 +1,8 @@
 ﻿using Precision.API.BAL.CommonServices.Interfaces;
 using Precision.API.Model.Common;
+using System.Net;
 using System.Net.Http.Headers;
+using System.Text;
 
 namespace Precision.API.BAL.CommonServices
 {
@@ -28,6 +30,27 @@ namespace Precision.API.BAL.CommonServices
             var client = new HttpClient();
 
             var response = await client.PostAsync(credential.Url, content);
+
+            return response;
+        }
+        public async Task<HttpResponseMessage?> PostRequest(LabCredential credential, string _resource, string _json, string processedFilePath)
+        {
+            await _common.CreateOrAppendFile(processedFilePath, string.Concat("- Post ", _resource));
+            await _common.CreateOrAppendFile(processedFilePath, string.Concat("RequestJSON -> ", _json));
+
+            HttpContent _content = new StringContent(_json, Encoding.UTF8, "application/json");
+
+            var client = new HttpClient();
+
+            var authenticationString = $"{credential.Username}:{credential.Password}";
+            var base64EncodedAuthenticationString = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(authenticationString));
+
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", base64EncodedAuthenticationString);
+            client.DefaultRequestHeaders
+              .Accept
+              .Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await client.PostAsync(credential.Url,_content);
 
             return response;
         }

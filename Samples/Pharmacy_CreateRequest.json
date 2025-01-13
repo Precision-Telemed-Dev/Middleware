@@ -1,0 +1,130 @@
+{
+  "requestType": "",
+  "referenceId": "REF-12345",
+  "prescription": {
+    "daysSupply": 7,
+    "referenceId": "P_REF-12345",
+    "requestType": 0,
+    "directions": "By Mouth",
+    "dispenseAsWritten": true,
+    "dosage": 1.5,
+    "expirationDate": "2025-05-07T13:05:49.131Z",
+    "ndc": "ABCDEFGHIJK",
+    "needsByDate": "2025-01-08T13:05:49.131Z",
+    "notes": "Its urgent!",
+    "productDescription": "Description",
+    "quantity": 50,
+    "remainingRefills": 5,
+    "totalRefills": 5,
+    "externalRxNumber": "EXT-RX-12345"
+  },  
+  "prescriptionTransferDetails": {
+    "transferringPharmacist": "string",
+    "receivingPharmacist": "string",
+    "fillsTransferred": 0,
+    "quantityTransferred": 0,
+    "firstFillDate": "2025-01-07T13:38:37.102Z",
+    "lastFillDate": "2025-01-07T13:38:37.102Z",
+    "writtenDate": "2025-01-07T13:38:37.102Z",
+    "originalRefills": 0,
+    "fromPharmacy": {
+      "name": "string",
+      "phoneNumber": "string",
+      "npi": "string",
+      "dea": "string",
+      "address": {
+        "address1": "string",
+        "address2": "string",
+        "city": "string",
+        "state": "string",
+        "zipCode": "string"
+      }
+    },
+    "toPharmacy": {
+      "name": "string",
+      "phoneNumber": "string",
+      "npi": "string",
+      "dea": "string",
+      "address": {
+        "address1": "string",
+        "address2": "string",
+        "city": "string",
+        "state": "string",
+        "zipCode": "string"
+      }
+    }
+  },
+  "prescriber": {
+    "dea": "",
+    "deaState": "",
+    "email": "",
+    "firstName": "VIJAY",
+    "lastName": "string",
+    "npi": "1962475822",
+    "phoneNumber": "9728679507",
+    "address": {
+      "address1": "1700 COIT RD",
+      "address2": "STE 101",
+      "city": "PLANO",
+      "state": "TX",
+      "zipCode": "75075"
+    }
+  },
+  "patient": {
+    "firstName": "Robert",
+    "middleName": "",
+    "lastName": "Brown",
+    "dateOfBirth": "1981-01-07T13:05:49.131Z",
+    "gender": "m",
+    "phoneNumber": "",
+    "email": "",
+    "externalPatientId": "",
+    "address": {
+      "address1": "007 Freeman Summit Apt. 482",
+      "address2": "Apt. 787",
+      "city": "Jonathanchester",
+      "state": "TX",
+      "zipCode": "02045"
+    },
+    "allergies": [
+      {
+        "allergenId": "478",
+        "allergenTypeCode": "123",
+        "description": "ijrmAVecODeVrIZYoDnTwliZETXPBftjWWNgpwZpRfXROKPRwp"
+      }
+    ],
+    "conditions": [
+      {
+        "icd10Code": "J45.90",
+        "description": "Unspecified Asthma"
+      }
+    ]
+  }, 
+  "deliveryDetails": {
+    "deliveryInstructions": "Instructions ...",
+    "fulfillmentMethod": "overnight_shipping",
+    "programName": "cash",
+    "serviceType": "shared services",
+    "signatureRequired": true,
+    "address": {
+      "address1": "123 Lake Suite",
+      "address2": "no. 888",
+      "city": "Longwood",
+      "state": "FL",
+      "zipCode": "38000"
+    }
+  },
+  "dispense": {
+    "quantity": 50,
+    "daysSupply": 5,
+    "ndc": "",
+    "dispenseAsWrittenCode": 5
+  },
+  "clinicalAssessments": [
+    {
+      "question": "What is the frequency",
+      "answer": "once a day",
+      "collectedDate": "2025-01-07T13:05:49.131Z"
+    }
+  ]
+}
