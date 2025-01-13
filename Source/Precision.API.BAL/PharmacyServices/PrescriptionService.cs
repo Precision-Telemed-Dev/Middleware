@@ -1,11 +1,8 @@
 ﻿using Nancy.Json;
 using Newtonsoft.Json;
 using Precision.API.BAL.CommonServices.Interfaces;
-using Precision.API.BAL.LabServices.Interfaces;
 using Precision.API.BAL.PharmacyServices.Interfaces;
 using Precision.API.Model.Enums;
-using Precision.API.Model.LabInfo;
-using System.Text;
 
 namespace Precision.API.BAL.PharmacyServices
 {
@@ -22,5 +19,7 @@ namespace Precision.API.BAL.PharmacyServices
 
             return json.Replace("{\"referenceId\"", "{\"requestType\":\"create\",\"referenceId\"");
         }
+        public async Task<string> GenerateCancelRequestJson(string processedFilePath, string id)
+        => JsonConvert.SerializeObject(new { externalRxNumber = id });
     }
 }
