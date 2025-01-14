@@ -5,6 +5,7 @@ namespace Precision.API.Model.Enums
         LabCreateOrder,
         PharmacyReadStatus,
         PharmacyCreateRequest,
-        PharmacyCancelRequest
+        PharmacyCancelRequest,
+        PharmacyRefillRequest
     }
 }
