@@ -15,29 +15,29 @@ namespace Precision.API.BAL.CommonServices
     {
         private readonly IHttpService _httpService;
         private readonly ICommonMethods _commonMethods;
-        private readonly IOrderService _orderService;
+        private readonly ILabOrderService _labOrderService;
 
-        public BaseService(IHttpService httpService, ICommonMethods commonMethods, IOrderService orderService)
+        public BaseService(IHttpService httpService, ICommonMethods commonMethods, ILabOrderService labOrderService)
         {
             _httpService = httpService;
             _commonMethods = commonMethods;
-            _orderService = orderService;
+            _labOrderService = labOrderService;
         }
         
-        public async Task<HttpResponseMessage> Save(Order order, string processedFilePath, LabCredential credential, LabResource labResource, string id = "")
+        public async Task<HttpResponseMessage> Save(LabOrder labOrder, string processedFilePath, Credential credential, Actions action, string id = "")
         {
-            await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Save ", labResource.ToString(), " Started ---"));
+            await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Save ", action.ToString(), " Started ---"));
 
             HttpResponseMessage? response = null;
 
-            string _str = labResource switch
+            string _str = action switch
             {
-                LabResource.CreateOrder => await _orderService.GenerateCSV(order, processedFilePath, id, labResource),
+                Actions.LabCreateOrder => await _labOrderService.GenerateCSV(labOrder),
             };
 
             credential.Url = string.Concat(credential.Url, "orderAPI.cgi");
 
-            response = await _httpService.PostRequestWithFile(credential, labResource.ToString(), _str, processedFilePath);
+            response = await _httpService.PostRequestWithFile(credential, action.ToString(), _str, processedFilePath);
 
             string result = response.Content.ReadAsStringAsync().Result;
 

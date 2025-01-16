@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ICommonMethods, CommonMethods>();
 builder.Services.AddScoped<IHttpService, HttpService>();
 builder.Services.AddScoped<IBaseService, BaseService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ILabOrderService, LabOrderService>();
 
 var app = builder.Build();
 

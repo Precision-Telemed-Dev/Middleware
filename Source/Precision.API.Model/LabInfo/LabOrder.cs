@@ -1,8 +1,8 @@
 ﻿namespace Precision.API.Model.LabInfo
 {
-    public class Order
+    public class LabOrder
     {
-        public Order()
+        public LabOrder()
         {
         }
         public string PatientChart { get; set; }

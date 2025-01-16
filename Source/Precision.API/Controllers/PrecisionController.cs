@@ -22,38 +22,36 @@ namespace Precision.API.Controllers
         string exceptionFilePath = String.Empty;
         string processedFilePath = String.Empty;
 
-        LabCredential credential = new LabCredential();
+        Credential credential = new Credential();
 
-        const Module module = Module.Lab;
-
-        public PrecisionController(IConfiguration configuration, ICommonMethods commonMethods, IBaseService baseService, IOrderService orderService)
+        public PrecisionController(IConfiguration configuration, ICommonMethods commonMethods, IBaseService baseService, ILabOrderService labOrderService)
         {
             _configuration = configuration;
             _common = commonMethods;
             _baseService = baseService;
 
-            _path = _configuration.GetValue<string>("LogPath");
-
-            credential.Username = _configuration.GetValue<string>("LabUsername");
-            credential.Password = _configuration.GetValue<string>("LabPassword");
-            credential.Mode = _configuration.GetValue<string>("LabMode");
-            credential.Url = _configuration.GetValue<string>("LabUrl");
-
-            exceptionFilePath = string.Concat(_path, module.ToString(), "\\Exceptions\\", "Exception_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
-            processedFilePath = string.Concat(_path, module.ToString(), "\\Processed\\", "Processed_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+            _path = _configuration.GetValue<string>("LogPath");          
         }
 
         [TypeFilter(typeof(AuthorizationFilterAttribute))]
         [HttpPost]
         [Route("Lab/CreateOrder")]
-        public async Task<ActionResult> CreateOrder([FromHeader] string username, [FromHeader] string password, [FromBody] Order order)
+        public async Task<ActionResult> CreateOrder([FromHeader] string username, [FromHeader] string password, [FromBody] LabOrder order)
         {
+            credential.Username = _configuration.GetValue<string>("LabUsername");
+            credential.Password = _configuration.GetValue<string>("LabPassword");
+            credential.Mode = _configuration.GetValue<string>("LabMode");
+            credential.Url = _configuration.GetValue<string>("LabUrl");
+
+            exceptionFilePath = string.Concat(_path, Module.Lab.ToString(), "\\Exceptions\\", "Exception_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+            processedFilePath = string.Concat(_path, Module.Lab.ToString(), "\\Processed\\", "Processed_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+
             HttpResponseMessage response = new HttpResponseMessage();
 
             try
             {
                 await _common.CreateOrAppendFile(processedFilePath, String.Concat("------------- " 
-                    + module.ToString() + " - " + LabResource.CreateOrder.ToString() + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
+                     + Actions.LabCreateOrder.ToString() + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
                 await _common.CreateOrAppendFile(processedFilePath, System.Text.Json.JsonSerializer.Serialize(order));
 
                 if (string.IsNullOrEmpty(AuthorizeSession.accessToken))
@@ -62,14 +60,14 @@ namespace Precision.API.Controllers
                 credential.SessionKey = AuthorizeSession.accessToken;
 
                 if (response.IsSuccessStatusCode)
-                    response = await _baseService.Save(order, processedFilePath, credential, LabResource.CreateOrder);
+                    response = await _baseService.Save(order, processedFilePath, credential, Actions.LabCreateOrder);
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     response = await AuthorizeSession.Authorize(credential);
 
                     if (response.IsSuccessStatusCode)
-                        response = await _baseService.Save(order, processedFilePath, credential, LabResource.CreateOrder);
+                        response = await _baseService.Save(order, processedFilePath, credential, Actions.LabCreateOrder);
                 }
             }
             catch (Exception ex)

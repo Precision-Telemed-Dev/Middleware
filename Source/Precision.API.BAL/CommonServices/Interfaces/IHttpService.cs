@@ -4,6 +4,6 @@ namespace Precision.API.BAL.CommonServices.Interfaces
 {
     public interface IHttpService
     {
-        Task<HttpResponseMessage?> PostRequestWithFile(LabCredential credential, string _resource, string st, string processedFilePath);
+        Task<HttpResponseMessage?> PostRequestWithFile(Credential credential, string _resource, string st, string processedFilePath);
     }
 }

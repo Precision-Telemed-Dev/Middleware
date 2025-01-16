@@ -8,7 +8,7 @@ namespace Precision.API.BAL.CommonServices
         private readonly ICommonMethods _common;
 
         public HttpService(ICommonMethods commonMethods) { _common = commonMethods; }
-        public async Task<HttpResponseMessage?> PostRequestWithFile(LabCredential credential, string _resource, string st, string processedFilePath)
+        public async Task<HttpResponseMessage?> PostRequestWithFile(Credential credential, string _resource, string st, string processedFilePath)
         {
             await _common.CreateOrAppendFile(processedFilePath, string.Concat("- Post ", _resource));
             await _common.CreateOrAppendFile(processedFilePath, string.Concat("RequestCSV -> ", st));

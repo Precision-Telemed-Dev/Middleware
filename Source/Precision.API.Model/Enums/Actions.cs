@@ -1,7 +1,7 @@
 namespace Precision.API.Model.Enums
 {
-    public enum LabResource
+    public enum Actions
     {
-        CreateOrder,
+        LabCreateOrder,
     }
 }
