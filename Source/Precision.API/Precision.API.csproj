@@ -8,6 +8,11 @@
     <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="Precision.API.csproj" />
+    <None Include="Precision.API.csproj.user" />
+  </ItemGroup>
+
   <ItemGroup>        
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
