@@ -43,8 +43,7 @@ namespace Precision.API.Controllers
             credential.Username = _configuration.GetValue<string>("LabUsername");
             credential.Password = _configuration.GetValue<string>("LabPassword");
             credential.Mode = _configuration.GetValue<string>("LabMode");
-            credential.Url = _configuration.GetValue<string>("LabUrl");
-            credential.Url = string.Concat(credential.Url, "orderAPI.cgi");
+            credential.Url = _configuration.GetValue<string>("LabUrl");            
 
             exceptionFilePath = string.Concat(_path, Module.Lab.ToString(), "\\Exceptions\\", "Exception_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
             processedFilePath = string.Concat(_path, Module.Lab.ToString(), "\\Processed\\", "Processed_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");

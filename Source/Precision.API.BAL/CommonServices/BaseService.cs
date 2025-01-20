@@ -35,6 +35,8 @@ namespace Precision.API.BAL.CommonServices
                 Actions.LabCreateOrder => await _labOrderService.GenerateCSV(labOrder),
             };
 
+            credential.Url = string.Concat(credential.Url, "orderAPI.cgi");
+
             response = await _httpService.PostRequestWithFile(credential, action.ToString(), _str, processedFilePath);
 
             string result = response.Content.ReadAsStringAsync().Result;
@@ -45,21 +47,21 @@ namespace Precision.API.BAL.CommonServices
             //                    "ordnum":"DocChart123122144", "client":Native American, "error":"Row 2: Missing Account Number.
             //"}],"success": false}
 
-            try
-            {
-                var jObj = (JObject)JsonConvert.DeserializeObject(result);
+            //try
+            //{
+            //    var jObj = (JObject)JsonConvert.DeserializeObject(result);
 
-                if (!Convert.ToBoolean(jObj["success"]))
-                {
-                    response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
-                    response.ReasonPhrase = jObj["msg"].ToString().RemoveUselessChars();
-                }
-            }
-            catch
-            {
-                response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
-                response.ReasonPhrase = result.RemoveUselessChars();
-            }
+            //    if (!Convert.ToBoolean(jObj["success"]))
+            //    {
+            //        response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+            //        response.ReasonPhrase = jObj["msg"].ToString().RemoveUselessChars();
+            //    }
+            //}
+            //catch
+            //{
+            //    response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+            //    response.ReasonPhrase = result.RemoveUselessChars();
+            //}
 
             return response;
         }
