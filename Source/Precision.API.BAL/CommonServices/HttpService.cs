@@ -45,7 +45,7 @@ namespace Precision.API.BAL.CommonServices
               .Accept
               .Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var response = await client.GetAsync(string.Concat(credential.Url, "/", _id));
+            var response = await client.GetAsync(string.Concat(credential.Url, _id));
 
             return response;
         }
