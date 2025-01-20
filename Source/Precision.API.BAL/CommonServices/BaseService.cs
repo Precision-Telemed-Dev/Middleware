@@ -6,7 +6,6 @@ using Precision.API.BAL.PharmacyServices.Interfaces;
 using Precision.API.Model.Common;
 using Precision.API.Model.Enums;
 using Precision.API.Model.LabInfo;
-using System.Net;
 
 namespace Precision.API.BAL.CommonServices
 {
@@ -14,18 +13,57 @@ namespace Precision.API.BAL.CommonServices
     {
         private readonly IHttpService _httpService;
         private readonly ICommonMethods _commonMethods;
-        private readonly IOrderService _orderService;
+        private readonly ILabOrderService _labOrderService;
         private readonly IPrescriptionService _prescriptionService;
 
-        public BaseService(IHttpService httpService, ICommonMethods commonMethods, IOrderService orderService, IPrescriptionService prescriptionService)
+        public BaseService(IHttpService httpService, ICommonMethods commonMethods, ILabOrderService orderService, IPrescriptionService prescriptionService)
         {
             _httpService = httpService;
             _commonMethods = commonMethods;
-            _orderService = orderService;
+            _labOrderService = orderService;
             _prescriptionService = prescriptionService;
         }
 
-        public async Task<HttpResponseMessage> SavePharmacy(Precision.API.Model.PharmacyInfo.PrescriptionOrder order, string processedFilePath, LabCredential credential, Actions action, string id = "")
+        public async Task<HttpResponseMessage> Save(LabOrder labOrder, string processedFilePath, Credential credential, Actions action, string id = "")
+        {
+            await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Save ", action.ToString(), " Started ---"));
+
+            HttpResponseMessage? response = null;
+
+            string _str = action switch
+            {
+                Actions.LabCreateOrder => await _labOrderService.GenerateCSV(labOrder),
+            };
+
+            response = await _httpService.PostRequestWithFile(credential, action.ToString(), _str, processedFilePath);
+
+            string result = response.Content.ReadAsStringAsync().Result;
+
+            // Not able to parse below json
+            //            {
+            //                "orders":[{
+            //                    "ordnum":"DocChart123122144", "client":Native American, "error":"Row 2: Missing Account Number.
+            //"}],"success": false}
+
+            try
+            {
+                var jObj = (JObject)JsonConvert.DeserializeObject(result);
+
+                if (!Convert.ToBoolean(jObj["success"]))
+                {
+                    response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                    response.ReasonPhrase = jObj["msg"].ToString().RemoveUselessChars();
+                }
+            }
+            catch
+            {
+                response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                response.ReasonPhrase = result.RemoveUselessChars();
+            }
+
+            return response;
+        }
+        public async Task<HttpResponseMessage> SavePharmacy(Precision.API.Model.PharmacyInfo.PrescriptionOrder order, string processedFilePath, Credential credential, Actions action, string id = "")
         {
             await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Save ", action.ToString(), " Started ---"));
 
@@ -42,8 +80,7 @@ namespace Precision.API.BAL.CommonServices
 
             return response;
         }
-
-        public async Task<HttpResponseMessage> Get(string processedFilePath, LabCredential credential, string id, Actions action)
+        public async Task<HttpResponseMessage> Get(string processedFilePath, Credential credential, string id, Actions action)
         {
             await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Get ", action.ToString(), " Started ---"));
 
