@@ -33,7 +33,7 @@ namespace Precision.API.BAL.CommonServices
         }
         public async Task<HttpResponseMessage?> GetRequest(Credential credential, string _resource, string processedFilePath, string _id)
         {
-            await _common.CreateOrAppendFile(processedFilePath, string.Concat("- Get ", action, " (", _id, ")"));
+            await _common.CreateOrAppendFile(processedFilePath, string.Concat("- Get ", _resource, " (", _id, ")"));
 
             var client = new HttpClient();
 

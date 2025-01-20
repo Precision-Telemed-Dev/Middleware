@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Precision.API.BAL.CommonServices.Interfaces;
 using Precision.API.BAL.LabServices.Interfaces;
 using Precision.API.Model.Common;
@@ -60,7 +62,7 @@ namespace Precision.API.BAL.CommonServices
             return response;
         }
 
-        public async Task<HttpResponseMessage> Get(string processedFilePath, LabCredential credential, string id, Actions action)
+        public async Task<HttpResponseMessage> Get(string processedFilePath, Credential credential, string id, Actions action)
         {
             await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Get ", action.ToString(), " Started ---"));
 

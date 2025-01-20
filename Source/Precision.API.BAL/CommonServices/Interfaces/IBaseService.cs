@@ -6,7 +6,7 @@ namespace Precision.API.BAL.CommonServices.Interfaces
 {
     public interface IBaseService
     {
-        Task<HttpResponseMessage> Save(Order order, string processedFilePath, LabCredential credential, string id = "");
-        Task<HttpResponseMessage> Get(string processedFilePath, LabCredential credential, string id, Actions action);
+        Task<HttpResponseMessage> Save(LabOrder labOrder, string processedFilePath, Credential credential, Actions action, string id = "");
+        Task<HttpResponseMessage> Get(string processedFilePath, Credential credential, string id, Actions action);
     }
 }
