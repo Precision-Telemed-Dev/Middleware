@@ -1,0 +1,62 @@
+{
+  "referenceId": "REF-10000",
+  "prescription": {
+    "daysSupply": 7,
+    "directions": "By Mouth",
+    "dispenseAsWritten": true,
+    "dosage": 1.5,
+    "expirationDate": "2025-05-07",
+    "ndc": "ABCDEFGHIJK",
+    "productDescription": "Description",
+    "quantity": 50,
+    "remainingRefills": 5,
+    "totalRefills": 5,
+    "externalRxNumber": "EXT-RX-12345"
+  },  
+  "prescriptionTransferDetails": {
+    "writtenDate": "2025-01-07"
+  },
+  "prescriber": {
+    "firstName": "VIJAY",
+    "lastName": "string",
+    "npi": "1962475822",
+    "phoneNumber": "9728679507",
+    "address": {
+      "address1": "1700 COIT RD",
+      "address2": "",
+      "city": "PLANO",
+      "state": "TX",
+      "zipCode": "75075"
+    }
+  },
+  "patient": {
+    "firstName": "Robert",
+    "middleName": "",
+    "lastName": "Brown",
+    "dateOfBirth": "1981-01-07",
+    "gender": "m",
+    "phoneNumber": "",
+    "email": "",
+    "externalPatientId": "",
+    "address": {
+      "address1": "007 Freeman Summit Apt. 482",
+      "address2": "",
+      "city": "Jonathanchester",
+      "state": "TX",
+      "zipCode": "02045"
+    },
+    "allergies": [
+      {
+        "allergenId": "478",
+        "allergenTypeCode": "123",
+        "description": "ijrmAVecODeVrIZYoDnTwliZETXPBftjWWNgpwZpRfXROKPRwp"
+      }
+    ],
+    "conditions": [
+      {
+        "icd10Code": "J45.90",
+        "description": "Unspecified Asthma"
+      }
+    ]
+  }
+}

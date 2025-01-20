@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Precision.API.BAL.CommonServices.Interfaces;
 using Precision.API.BAL.LabServices.Interfaces;
+using Precision.API.BAL.PharmacyServices.Interfaces;
 using Precision.API.Model.Common;
 using Precision.API.Model.Enums;
 using Precision.API.Model.LabInfo;
@@ -13,14 +14,16 @@ namespace Precision.API.BAL.CommonServices
         private readonly IHttpService _httpService;
         private readonly ICommonMethods _commonMethods;
         private readonly ILabOrderService _labOrderService;
+        private readonly IPrescriptionService _prescriptionService;
 
-        public BaseService(IHttpService httpService, ICommonMethods commonMethods, ILabOrderService labOrderService)
+        public BaseService(IHttpService httpService, ICommonMethods commonMethods, ILabOrderService orderService, IPrescriptionService prescriptionService)
         {
             _httpService = httpService;
             _commonMethods = commonMethods;
-            _labOrderService = labOrderService;
+            _labOrderService = orderService;
+            _prescriptionService = prescriptionService;
         }
-        
+
         public async Task<HttpResponseMessage> Save(LabOrder labOrder, string processedFilePath, Credential credential, Actions action, string id = "")
         {
             await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Save ", action.ToString(), " Started ---"));
@@ -32,17 +35,15 @@ namespace Precision.API.BAL.CommonServices
                 Actions.LabCreateOrder => await _labOrderService.GenerateCSV(labOrder),
             };
 
-            credential.Url = string.Concat(credential.Url, "orderAPI.cgi");
-
             response = await _httpService.PostRequestWithFile(credential, action.ToString(), _str, processedFilePath);
 
             string result = response.Content.ReadAsStringAsync().Result;
 
-// Not able to parse below json
-//            {
-//                "orders":[{
-//                    "ordnum":"DocChart123122144", "client":Native American, "error":"Row 2: Missing Account Number.
-//"}],"success": false}
+            // Not able to parse below json
+            //            {
+            //                "orders":[{
+            //                    "ordnum":"DocChart123122144", "client":Native American, "error":"Row 2: Missing Account Number.
+            //"}],"success": false}
 
             try
             {
@@ -53,7 +54,8 @@ namespace Precision.API.BAL.CommonServices
                     response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
                     response.ReasonPhrase = jObj["msg"].ToString().RemoveUselessChars();
                 }
-            } catch
+            }
+            catch
             {
                 response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
                 response.ReasonPhrase = result.RemoveUselessChars();
@@ -61,7 +63,23 @@ namespace Precision.API.BAL.CommonServices
 
             return response;
         }
+        public async Task<HttpResponseMessage> SavePharmacy(Precision.API.Model.PharmacyInfo.PrescriptionOrder order, string processedFilePath, Credential credential, Actions action, string id = "")
+        {
+            await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Save ", action.ToString(), " Started ---"));
 
+            HttpResponseMessage? response = null;
+
+            string _str = action switch
+            {
+                Actions.PharmacyCreateRequest => await _prescriptionService.GenerateJson(order, processedFilePath, id, action),
+            };
+
+            response = await _httpService.PostRequest(credential, action.ToString(), _str, processedFilePath);
+
+            string result = response.Content.ReadAsStringAsync().Result;
+
+            return response;
+        }
         public async Task<HttpResponseMessage> Get(string processedFilePath, Credential credential, string id, Actions action)
         {
             await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Get ", action.ToString(), " Started ---"));

@@ -44,6 +44,7 @@ namespace Precision.API.Controllers
             credential.Password = _configuration.GetValue<string>("LabPassword");
             credential.Mode = _configuration.GetValue<string>("LabMode");
             credential.Url = _configuration.GetValue<string>("LabUrl");
+            credential.Url = string.Concat(credential.Url, "orderAPI.cgi");
 
             exceptionFilePath = string.Concat(_path, Module.Lab.ToString(), "\\Exceptions\\", "Exception_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
             processedFilePath = string.Concat(_path, Module.Lab.ToString(), "\\Processed\\", "Processed_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
@@ -124,6 +125,46 @@ namespace Precision.API.Controllers
 
             return StatusCode(Convert.ToInt32(response.StatusCode)
                 , (response.IsSuccessStatusCode) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase);
+        }
+
+        [TypeFilter(typeof(AuthorizationFilterAttribute))]
+        [HttpPost]
+        [Route("Pharmacy/CreateRequest")]
+        public async Task<ActionResult> CreateRequest([FromHeader] string username, [FromHeader] string password, [FromBody] Precision.API.Model.PharmacyInfo.PrescriptionOrder order)
+        {
+            credential.Username = _configuration.GetValue<string>("PharUsername");
+            credential.Password = _configuration.GetValue<string>("PharPassword");
+            credential.Url = _configuration.GetValue<string>("PharUrl");
+            credential.Url = string.Concat(credential.Url, "create/");
+
+            exceptionFilePath = string.Concat(_path, Module.Pharmacy.ToString(), "\\Exceptions\\", "Exception_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+            processedFilePath = string.Concat(_path, Module.Pharmacy.ToString(), "\\Processed\\", "Processed_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+
+            HttpResponseMessage response = new HttpResponseMessage();
+
+            try
+            {
+                await _common.CreateOrAppendFile(processedFilePath, String.Concat("------------- "
+                    + Actions.PharmacyCreateRequest.ToString() + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
+                await _common.CreateOrAppendFile(processedFilePath, System.Text.Json.JsonSerializer.Serialize(order));
+
+                response = await _baseService.SavePharmacy(order, processedFilePath, credential, Actions.PharmacyCreateRequest);
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                response.ReasonPhrase = ex.InnerException == null ? ex.Message.RemoveUselessChars() : ex.InnerException.Message.RemoveUselessChars();
+            }
+
+            await _common.CreateOrAppendFile(processedFilePath, string.Concat(DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), " -> ",
+                    " StatusCode = ", response.StatusCode, " (", (int)response.StatusCode, "), Content = "
+                    , (response.StatusCode != HttpStatusCode.InternalServerError) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase));
+
+            //if (response.StatusCode == HttpStatusCode.BadRequest)
+            //    response.Content = new StringContent(String.Empty);
+
+            return StatusCode(Convert.ToInt32(response.StatusCode)
+                , (response.StatusCode != HttpStatusCode.InternalServerError) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase);
         }
     }
 }
