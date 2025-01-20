@@ -5,8 +5,8 @@ namespace Precision.Authorization
 {
     public static class AuthorizeSession
     {
-        public static string accessToken = string.Empty;
-        public async static Task<HttpResponseMessage> Authorize(LabCredential credential)
+        public static string accessToken = string.Empty;    
+        public async static Task<HttpResponseMessage> Authorize(Credential credential)
         {
             Uri uri = new Uri(string.Concat(credential.Url, "authAPI.cgi", "?mode=" + credential.Mode + "&username=" + credential.Username + "&password=" + credential.Password));
 
