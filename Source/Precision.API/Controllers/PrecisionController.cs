@@ -43,7 +43,9 @@ namespace Precision.API.Controllers
             credential.Username = _configuration.GetValue<string>("LabUsername");
             credential.Password = _configuration.GetValue<string>("LabPassword");
             credential.Mode = _configuration.GetValue<string>("LabMode");
-            credential.Url = _configuration.GetValue<string>("LabUrl");            
+            credential.Url = _configuration.GetValue<string>("LabUrl");
+            string pharClientNumber = _configuration.GetValue<string>("PharClientNumber");
+            string pharPhysicianNumber = _configuration.GetValue<string>("PharPhysicianNumber");
 
             exceptionFilePath = string.Concat(_path, Module.Lab.ToString(), "\\Exceptions\\", "Exception_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
             processedFilePath = string.Concat(_path, Module.Lab.ToString(), "\\Processed\\", "Processed_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
@@ -62,14 +64,14 @@ namespace Precision.API.Controllers
                 credential.SessionKey = AuthorizeSession.accessToken;
 
                 if (response.IsSuccessStatusCode)
-                    response = await _baseService.Save(order, processedFilePath, credential, Actions.LabCreateOrder);
+                    response = await _baseService.SaveLab(order, processedFilePath, credential, Actions.LabCreateOrder, pharClientNumber, pharPhysicianNumber);
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     response = await AuthorizeSession.Authorize(credential);
 
                     if (response.IsSuccessStatusCode)
-                        response = await _baseService.Save(order, processedFilePath, credential, Actions.LabCreateOrder);
+                        response = await _baseService.SaveLab(order, processedFilePath, credential, Actions.LabCreateOrder, pharClientNumber, pharPhysicianNumber);
                 }
             }
             catch (Exception ex)
