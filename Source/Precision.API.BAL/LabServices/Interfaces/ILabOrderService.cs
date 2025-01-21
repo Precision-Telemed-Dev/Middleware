@@ -5,6 +5,6 @@ namespace Precision.API.BAL.LabServices.Interfaces
 {
     public interface ILabOrderService
     {
-        Task<string> GenerateCSV(LabOrder order);
+        Task<string> GenerateCSV(LabOrder order, string pharClientNumber, string PharPhysicianNumber);
     }
 }

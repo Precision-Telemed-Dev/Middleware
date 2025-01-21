@@ -20,14 +20,10 @@
         public string PatientEmail { get; set; }
         public string PatientPhone { get; set; }
         public string PatientRace { get; set; }
-        public string ClientNumber { get; set; }
-        public string PhysicianNumber { get; set; }
         public string TestCode { get; set; }
         public string DiagnosisCode { get; set; }
         public string CollectionDate { get; set; }
         public string CollectionTime { get; set; }
-        public string InsuranceNumber { get; set; }
-        public string InsuranceID { get; set; }
         public string Source { get; set; }
         public string OrderComment { get; set; }
         public string PatientDocChart { get; set; }

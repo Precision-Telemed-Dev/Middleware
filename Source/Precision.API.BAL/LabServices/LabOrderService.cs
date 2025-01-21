@@ -13,7 +13,7 @@ namespace Precision.API.BAL.LabServices
         {
             _common = commonMethods;
         }
-        public async Task<string> GenerateCSV(LabOrder order)
+        public async Task<string> GenerateCSV(LabOrder order, string pharClientNumber, string PharPhysicianNumber)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -26,8 +26,8 @@ namespace Precision.API.BAL.LabServices
             {
                 sb.AppendLine(string.Join("\",\"", "\"" + order.PatientChart, order.PatientFirstName, order.PatientMiddleInitial, order.PatientLastName, order.PatientGender,
                     order.PatientDOB, order.CareOf, order.PatientAddress1, order.PatientAddress2, order.PatientCity, order.PatientState, order.PatientZip, order.PatientEmail,
-                    order.PatientPhone, order.PatientRace, order.ClientNumber, order.PhysicianNumber, testCode.Trim(), order.DiagnosisCode, order.CollectionDate, order.CollectionTime,
-                    order.InsuranceNumber, order.InsuranceID, order.Source, order.OrderComment, order.PatientDocChart, order.OrderNumber + "\""));
+                    order.PatientPhone, order.PatientRace, pharClientNumber, PharPhysicianNumber, testCode.Trim(), order.DiagnosisCode, order.CollectionDate, order.CollectionTime,
+                    "0", "", order.Source, order.OrderComment, order.PatientDocChart, order.OrderNumber + "\""));
             }
 
             return sb.ToString();

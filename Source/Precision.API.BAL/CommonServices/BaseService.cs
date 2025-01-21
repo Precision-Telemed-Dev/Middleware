@@ -24,7 +24,8 @@ namespace Precision.API.BAL.CommonServices
             _prescriptionService = prescriptionService;
         }
 
-        public async Task<HttpResponseMessage> Save(LabOrder labOrder, string processedFilePath, Credential credential, Actions action, string id = "")
+        public async Task<HttpResponseMessage> SaveLab(LabOrder labOrder, string processedFilePath, Credential credential, Actions action,
+            string pharClientNumber, string PharPhysicianNumber, string id = "")
         {
             await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Save ", action.ToString(), " Started ---"));
 
@@ -32,7 +33,7 @@ namespace Precision.API.BAL.CommonServices
 
             string _str = action switch
             {
-                Actions.LabCreateOrder => await _labOrderService.GenerateCSV(labOrder),
+                Actions.LabCreateOrder => await _labOrderService.GenerateCSV(labOrder, pharClientNumber, PharPhysicianNumber),
             };
 
             credential.Url = string.Concat(credential.Url, "orderAPI.cgi");
