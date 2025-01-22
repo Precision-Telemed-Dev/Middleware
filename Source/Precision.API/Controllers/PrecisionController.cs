@@ -82,11 +82,8 @@ namespace Precision.API.Controllers
             }
 
             await _common.CreateOrAppendFile(processedFilePath, string.Concat(DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), " -> ",
-                    " StatusCode = ", response.StatusCode, " (", (int)response.StatusCode, "), Content = "
-                    , (response.StatusCode != HttpStatusCode.InternalServerError) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase));
-
-            //if (response.StatusCode == HttpStatusCode.BadRequest)
-            //    response.Content = new StringContent(String.Empty);
+                    " StatusCode = ", response.StatusCode, " (", (int)response.StatusCode, "), ReasonPhrase = ", response.ReasonPhrase,
+                    ", Content = ", response.Content != null ? response.Content.ReadAsStringAsync().Result : string.Empty));
 
             return StatusCode(Convert.ToInt32(response.StatusCode)
                 , (response.StatusCode != HttpStatusCode.InternalServerError) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase);
@@ -115,7 +112,21 @@ namespace Precision.API.Controllers
                     + Actions.LabReadResult.ToString() + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
                 await _common.CreateOrAppendFile(processedFilePath, String.Concat("Filter: ", filter));
 
-                response = await _baseService.Get(processedFilePath, credential, filter, Actions.LabReadResult);
+                if (string.IsNullOrEmpty(AuthorizeSession.accessToken))
+                    response = await AuthorizeSession.Authorize(credential);
+
+                credential.SessionKey = AuthorizeSession.accessToken;
+
+                if (response.IsSuccessStatusCode)
+                    response = await _baseService.Get(processedFilePath, credential, filter, Actions.LabReadResult);
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    response = await AuthorizeSession.Authorize(credential);
+
+                    if (response.IsSuccessStatusCode)
+                        response = await _baseService.Get(processedFilePath, credential, filter, Actions.LabReadResult);
+                }                
             }
             catch (Exception ex)
             {

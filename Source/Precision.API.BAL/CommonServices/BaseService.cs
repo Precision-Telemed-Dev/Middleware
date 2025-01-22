@@ -101,8 +101,8 @@ namespace Precision.API.BAL.CommonServices
                 try
                 {
                     var jObj = (JObject)JsonConvert.DeserializeObject(result);
-                    var str = jObj["success"];
-                    if (!Convert.ToBoolean(jObj["success"]))
+                    
+                    if (!Convert.ToBoolean(jObj["success"].ToString()))
                     {
                         response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
                         response.ReasonPhrase = jObj["msg"].ToString().RemoveUselessChars();
