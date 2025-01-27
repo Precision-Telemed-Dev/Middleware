@@ -25,37 +25,38 @@ namespace Precision.API.Controllers
         string exceptionFilePath = String.Empty;
         string processedFilePath = String.Empty;
 
-        LabCredential credential = new LabCredential();
+        Credential credential = new Credential();
 
-        const Module module = Module.Lab;
-
-        public PrecisionController(IConfiguration configuration, ICommonMethods commonMethods, IBaseService baseService, IOrderService orderService)
+        public PrecisionController(IConfiguration configuration, ICommonMethods commonMethods, IBaseService baseService, ILabOrderService labOrderService)
         {
             _configuration = configuration;
             _common = commonMethods;
             _baseService = baseService;
 
-            _path = _configuration.GetValue<string>("LogPath");
-
-            credential.Username = _configuration.GetValue<string>("LabUsername");
-            credential.Password = _configuration.GetValue<string>("LabPassword");
-            credential.Mode = _configuration.GetValue<string>("LabMode");
-            credential.Url = _configuration.GetValue<string>("LabUrl");
-
-            exceptionFilePath = string.Concat(_path, module.ToString(), "\\Exceptions\\", "Exception_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
-            processedFilePath = string.Concat(_path, module.ToString(), "\\Processed\\", "Processed_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+            _path = _configuration.GetValue<string>("LogPath");          
         }
 
         [TypeFilter(typeof(AuthorizationFilterAttribute))]
         [HttpPost]
-        public async Task<ActionResult> Post([FromHeader] string username, [FromHeader] string password, [FromBody] Order order)
+        [Route("Lab/CreateOrder")]
+        public async Task<ActionResult> CreateOrder([FromHeader] string username, [FromHeader] string password, [FromBody] LabOrder order)
         {
+            credential.Username = _configuration.GetValue<string>("LabUsername");
+            credential.Password = _configuration.GetValue<string>("LabPassword");
+            credential.Mode = _configuration.GetValue<string>("LabMode");
+            credential.Url = _configuration.GetValue<string>("LabUrl");
+            string pharClientNumber = _configuration.GetValue<string>("PharClientNumber");
+            string pharPhysicianNumber = _configuration.GetValue<string>("PharPhysicianNumber");
+
+            exceptionFilePath = string.Concat(_path, Module.Lab.ToString(), "\\Exceptions\\", "Exception_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+            processedFilePath = string.Concat(_path, Module.Lab.ToString(), "\\Processed\\", "Processed_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+
             HttpResponseMessage response = new HttpResponseMessage();
 
             try
             {
-                await _common.CreateOrAppendFile(processedFilePath, String.Concat("------------- "
-                    + module.ToString() + " - " + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
+                await _common.CreateOrAppendFile(processedFilePath, String.Concat("------------- " 
+                     + Actions.LabCreateOrder.ToString() + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
                 await _common.CreateOrAppendFile(processedFilePath, System.Text.Json.JsonSerializer.Serialize(order));
 
                 if (string.IsNullOrEmpty(AuthorizeSession.accessToken))
@@ -63,15 +64,15 @@ namespace Precision.API.Controllers
 
                 credential.SessionKey = AuthorizeSession.accessToken;
 
-                //if (response.IsSuccessStatusCode)
-                // Save Order
+                if (response.IsSuccessStatusCode)
+                    response = await _baseService.SaveLab(order, processedFilePath, credential, Actions.LabCreateOrder, pharClientNumber, pharPhysicianNumber);
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     response = await AuthorizeSession.Authorize(credential);
 
-                    //if (response.IsSuccessStatusCode)
-                    // Save Order
+                    if (response.IsSuccessStatusCode)
+                        response = await _baseService.SaveLab(order, processedFilePath, credential, Actions.LabCreateOrder, pharClientNumber, pharPhysicianNumber);
                 }
             }
             catch (Exception ex)
@@ -81,16 +82,65 @@ namespace Precision.API.Controllers
             }
 
             await _common.CreateOrAppendFile(processedFilePath, string.Concat(DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), " -> ",
-                    " StatusCode = ", response.StatusCode, " (", (int)response.StatusCode, "), Content = "
-                    , (response.StatusCode != HttpStatusCode.InternalServerError) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase));
-
-            //if (response.StatusCode == HttpStatusCode.BadRequest)
-            //    response.Content = new StringContent(String.Empty);
+                    " StatusCode = ", response.StatusCode, " (", (int)response.StatusCode, "), ReasonPhrase = ", response.ReasonPhrase,
+                    ", Content = ", response.Content != null ? response.Content.ReadAsStringAsync().Result : string.Empty));
 
             return StatusCode(Convert.ToInt32(response.StatusCode)
                 , (response.StatusCode != HttpStatusCode.InternalServerError) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase);
         }
+        [TypeFilter(typeof(AuthorizationFilterAttribute))]
+        [HttpGet]
+        [Route("Lab/ReadResult")]
+        public async Task<ActionResult> ReadResult([FromHeader] string username, [FromHeader] string password, 
+            [Required] string startDate, [Required] string endDate)
+        {
+            credential.Username = _configuration.GetValue<string>("LabUsername");
+            credential.Password = _configuration.GetValue<string>("LabPassword");
+            credential.Mode = _configuration.GetValue<string>("LabMode");
+            credential.Url = _configuration.GetValue<string>("LabUrl");
 
+            exceptionFilePath = string.Concat(_path, Module.Lab.ToString(), "\\Exceptions\\", "Exception_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+            processedFilePath = string.Concat(_path, Module.Lab.ToString(), "\\Processed\\", "Processed_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+
+            string filter = string.Concat("start_date=", startDate, "&", "end_date=", endDate);
+
+            HttpResponseMessage response = new HttpResponseMessage();
+
+            try
+            {
+                await _common.CreateOrAppendFile(processedFilePath, String.Concat("------------- "
+                    + Actions.LabReadResult.ToString() + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
+                await _common.CreateOrAppendFile(processedFilePath, String.Concat("Filter: ", filter));
+
+                if (string.IsNullOrEmpty(AuthorizeSession.accessToken))
+                    response = await AuthorizeSession.Authorize(credential);
+
+                credential.SessionKey = AuthorizeSession.accessToken;
+
+                if (response.IsSuccessStatusCode)
+                    response = await _baseService.Get(processedFilePath, credential, filter, Actions.LabReadResult);
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    response = await AuthorizeSession.Authorize(credential);
+
+                    if (response.IsSuccessStatusCode)
+                        response = await _baseService.Get(processedFilePath, credential, filter, Actions.LabReadResult);
+                }                
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                response.ReasonPhrase = ex.InnerException == null ? ex.Message.RemoveUselessChars() : ex.InnerException.Message.RemoveUselessChars();
+            }
+
+            await _common.CreateOrAppendFile(processedFilePath, string.Concat(DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), " -> ",
+                    " StatusCode = ", response.StatusCode, " (", (int)response.StatusCode, "), ReasonPhrase = ", response.ReasonPhrase,
+                    ", Content = ", response.Content != null ? response.Content.ReadAsStringAsync().Result : string.Empty));
+
+            return StatusCode(Convert.ToInt32(response.StatusCode)
+                , (response.IsSuccessStatusCode) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase);
+        }
         [TypeFilter(typeof(AuthorizationFilterAttribute))]
         [HttpGet]
         [Route("Pharmacy/ReadStatus/{rxnumber}")]

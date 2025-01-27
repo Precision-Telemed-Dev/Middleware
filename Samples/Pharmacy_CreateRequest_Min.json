@@ -11,7 +11,7 @@
     "quantity": 50,
     "remainingRefills": 5,
     "totalRefills": 5,
-    "externalRxNumber": "EXT-RX-12345"
+    "externalRxNumber": ""
   },  
   "prescriptionTransferDetails": {
     "writtenDate": "2025-01-07"
