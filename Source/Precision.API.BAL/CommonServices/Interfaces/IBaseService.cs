@@ -9,6 +9,6 @@ namespace Precision.API.BAL.CommonServices.Interfaces
         Task<HttpResponseMessage> SaveLab(LabOrder labOrder, string processedFilePath, Credential credential, Actions action,
             string pharClientNumber, string PharPhysicianNumber, string id = "");
         Task<HttpResponseMessage> SavePharmacy(Precision.API.Model.PharmacyInfo.PrescriptionOrder order, string processedFilePath, Credential credential, Actions action, string id = "");
-        Task<HttpResponseMessage> Get(string processedFilePath, Credential credential, string id, Actions action);
+        Task<HttpResponseMessage> Get(string processedFilePath, Credential credential, string filter, Actions action);
     }
 }

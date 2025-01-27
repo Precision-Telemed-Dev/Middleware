@@ -83,11 +83,37 @@ namespace Precision.API.BAL.CommonServices
 
             return response;
         }
-        public async Task<HttpResponseMessage> Get(string processedFilePath, Credential credential, string id, Actions action)
+        public async Task<HttpResponseMessage> Get(string processedFilePath, Credential credential, string filter, Actions action)
         {
             await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Get ", action.ToString(), " Started ---"));
 
-            HttpResponseMessage? response = await _httpService.GetRequest(credential, action.ToString(), processedFilePath, id);
+            credential.Url = action switch
+            {
+                Actions.LabReadResult => string.Concat(credential.Url, "resultAPI.cgi?mode=fetchInbox&sessionkey=", credential.SessionKey, "&", filter)
+            };
+
+            HttpResponseMessage? response = await _httpService.GetRequest(credential, action.ToString(), processedFilePath, filter);
+
+            if (action == Actions.LabReadResult)
+            {
+                string result = response.Content.ReadAsStringAsync().Result;
+
+                try
+                {
+                    var jObj = (JObject)JsonConvert.DeserializeObject(result);
+                    
+                    if (!Convert.ToBoolean(jObj["success"].ToString()))
+                    {
+                        response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                        response.ReasonPhrase = jObj["msg"].ToString().RemoveUselessChars();
+                    }
+                }
+                catch
+                {
+                    response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                    response.ReasonPhrase = result.RemoveUselessChars();
+                }
+            }
 
             return response;
         }
