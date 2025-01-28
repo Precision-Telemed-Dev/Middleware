@@ -199,7 +199,7 @@ namespace Precision.API.Controllers
                     + Actions.PharmacyCreateRequest.ToString() + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
                 await _common.CreateOrAppendFile(processedFilePath, System.Text.Json.JsonSerializer.Serialize(order));
 
-                response = await _baseService.SavePharmacy(order, processedFilePath, credential, Actions.PharmacyCreateRequest);
+                response = await _baseService.SavePharmacy(processedFilePath, credential, Actions.PharmacyCreateRequest, order);
             }
             catch (Exception ex)
             {
@@ -213,6 +213,85 @@ namespace Precision.API.Controllers
 
             //if (response.StatusCode == HttpStatusCode.BadRequest)
             //    response.Content = new StringContent(String.Empty);
+
+            return StatusCode(Convert.ToInt32(response.StatusCode)
+                , (response.StatusCode != HttpStatusCode.InternalServerError) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase);
+        }
+
+        [TypeFilter(typeof(AuthorizationFilterAttribute))]
+        [HttpPost]
+        [Route("Pharmacy/CreateRefillRequest")]
+        public async Task<ActionResult> CreateRefillRequest([FromHeader] string username, [FromHeader] string password, [FromBody] Precision.API.Model.PharmacyInfo.RefillOrder order)
+        {
+            credential.Username = _configuration.GetValue<string>("PharUsername");
+            credential.Password = _configuration.GetValue<string>("PharPassword");
+            credential.Url = _configuration.GetValue<string>("PharUrl");
+            credential.Url = string.Concat(credential.Url, "refill/");
+
+            exceptionFilePath = string.Concat(_path, Module.Pharmacy.ToString(), "\\Exceptions\\", "Exception_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+            processedFilePath = string.Concat(_path, Module.Pharmacy.ToString(), "\\Processed\\", "Processed_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+
+            HttpResponseMessage response = new HttpResponseMessage();
+
+            try
+            {
+                await _common.CreateOrAppendFile(processedFilePath, String.Concat("------------- "
+                    + Actions.PharmacyRefillRequest.ToString() + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
+                await _common.CreateOrAppendFile(processedFilePath, System.Text.Json.JsonSerializer.Serialize(order));
+
+                response = await _baseService.SavePharmacy(processedFilePath, credential, Actions.PharmacyRefillRequest, order);
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                response.ReasonPhrase = ex.InnerException == null ? ex.Message.RemoveUselessChars() : ex.InnerException.Message.RemoveUselessChars();
+            }
+
+            await _common.CreateOrAppendFile(processedFilePath, string.Concat(DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), " -> ",
+                    " StatusCode = ", response.StatusCode, " (", (int)response.StatusCode, "), Content = "
+                    , (response.StatusCode != HttpStatusCode.InternalServerError) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase));
+
+            //if (response.StatusCode == HttpStatusCode.BadRequest)
+            //    response.Content = new StringContent(String.Empty);
+
+            return StatusCode(Convert.ToInt32(response.StatusCode)
+                , (response.StatusCode != HttpStatusCode.InternalServerError) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase);
+        }
+
+        [TypeFilter(typeof(AuthorizationFilterAttribute))]
+        [HttpDelete]
+        [Route("Pharmacy/CancelRequest")]
+        public async Task<ActionResult> CancelRequest([FromHeader] string username, [FromHeader] string password, [Required] string rxnumber)
+        {
+            credential.Username = _configuration.GetValue<string>("PharUsername");
+            credential.Password = _configuration.GetValue<string>("PharPassword");
+            credential.Url = _configuration.GetValue<string>("PharUrl");
+            credential.Url = string.Concat(credential.Url, "transfer-back/");
+
+            exceptionFilePath = string.Concat(_path, Module.Pharmacy.ToString(), "\\Exceptions\\", "Exception_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+            processedFilePath = string.Concat(_path, Module.Pharmacy.ToString(), "\\Processed\\", "Processed_", DateTime.Now.ToString("yyyy-MM-dd"), ".txt");
+
+            HttpResponseMessage response = new HttpResponseMessage();
+
+            try
+            {
+                await _common.CreateOrAppendFile(processedFilePath, String.Concat("------------- "
+                    + Actions.PharmacyCancelRequest.ToString() + " Started (", DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), ") -------------"));
+                await _common.CreateOrAppendFile(processedFilePath, String.Concat("RxNumber: ", rxnumber));
+
+                response = await _baseService.SavePharmacy(processedFilePath, credential, Actions.PharmacyCancelRequest, null, rxnumber);
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                response.ReasonPhrase = ex.InnerException == null ? ex.Message.RemoveUselessChars() : ex.InnerException.Message.RemoveUselessChars();
+            }
+
+            await _common.CreateOrAppendFile(processedFilePath, string.Concat(DateTime.Now.ToString("yyyy-MM-ddTHHmmss"), " -> ",
+                    " StatusCode = ", response.StatusCode, " (", (int)response.StatusCode, "), Content = "
+                    , (response.StatusCode != HttpStatusCode.InternalServerError) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase));
+
+            response.Content = new StringContent(String.Empty);
 
             return StatusCode(Convert.ToInt32(response.StatusCode)
                 , (response.StatusCode != HttpStatusCode.InternalServerError) ? await response.Content.ReadAsStringAsync() : response.ReasonPhrase);

@@ -66,7 +66,8 @@ namespace Precision.API.BAL.CommonServices
 
             return response;
         }
-        public async Task<HttpResponseMessage> SavePharmacy(Precision.API.Model.PharmacyInfo.PrescriptionOrder order, string processedFilePath, Credential credential, Actions action, string id = "")
+
+        public async Task<HttpResponseMessage> SavePharmacy(string processedFilePath, Credential credential, Actions action, object order, string id = "")
         {
             await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Save ", action.ToString(), " Started ---"));
 
@@ -74,12 +75,12 @@ namespace Precision.API.BAL.CommonServices
 
             string _str = action switch
             {
-                Actions.PharmacyCreateRequest => await _prescriptionService.GenerateJson(order, processedFilePath, id, action),
+                Actions.PharmacyCreateRequest => await _prescriptionService.GenerateJson((Precision.API.Model.PharmacyInfo.PrescriptionOrder)order),
+                Actions.PharmacyCancelRequest => await _prescriptionService.GenerateCancelRequestJson(processedFilePath, id),
+                Actions.PharmacyRefillRequest => await _prescriptionService.GenerateRefillJson((Precision.API.Model.PharmacyInfo.RefillOrder)order)
             };
 
             response = await _httpService.PostRequest(credential, action.ToString(), _str, processedFilePath);
-
-            string result = response.Content.ReadAsStringAsync().Result;
 
             return response;
         }

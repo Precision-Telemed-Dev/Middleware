@@ -1,0 +1,65 @@
+{
+  "requestType": "",
+  "referenceId": "REF-12345",
+  "externalRxNumber": "6360",  
+  "patient": {
+    "firstName": "Robert",
+    "middleName": "",
+    "lastName": "Brown",
+    "dateOfBirth": "1981-01-07T13:05:49.131Z",
+    "gender": "m",
+    "phoneNumber": "",
+    "email": "",
+    "externalPatientId": "",
+    "address": {
+      "address1": "007 Freeman Summit Apt. 482",
+      "address2": "Apt. 787",
+      "city": "Jonathanchester",
+      "state": "TX",
+      "zipCode": "02045"
+    },
+    "allergies": [
+      {
+        "allergenId": "478",
+        "allergenTypeCode": "123",
+        "description": "ijrmAVecODeVrIZYoDnTwliZETXPBftjWWNgpwZpRfXROKPRwp"
+      }
+    ],
+    "conditions": [
+      {
+        "icd10Code": "J45.90",
+        "description": "Unspecified Asthma"
+      }
+    ]
+  }, 
+  "payment": {
+	  "copay": 100
+  },
+  "deliveryDetails": {
+    "deliveryInstructions": "Instructions ...",
+    "fulfillmentMethod": "overnight_shipping",
+    "programName": "cash",
+    "serviceType": "shared services",
+    "signatureRequired": true,
+    "address": {
+      "address1": "123 Lake Suite",
+      "address2": "no. 888",
+      "city": "Longwood",
+      "state": "FL",
+      "zipCode": "38000"
+    }
+  },
+  "dispense": {
+    "quantity": 50,
+    "daysSupply": 5,
+    "ndc": "",
+    "dispenseAsWrittenCode": 5
+  },
+  "clinicalAssessments": [
+    {
+      "question": "What is the frequency",
+      "answer": "once a day",
+      "collectedDate": "2025-01-07T13:05:49.131Z"
+    }
+  ]
+}
