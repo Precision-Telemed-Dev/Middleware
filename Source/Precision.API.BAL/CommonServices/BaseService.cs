@@ -88,10 +88,8 @@ namespace Precision.API.BAL.CommonServices
         {
             await _commonMethods.CreateOrAppendFile(processedFilePath, string.Concat("--- Get ", action.ToString(), " Started ---"));
 
-            credential.Url = action switch
-            {
-                Actions.LabReadResult => string.Concat(credential.Url, "resultAPI.cgi?mode=fetchInbox&sessionkey=", credential.SessionKey, "&", filter)
-            };
+            if (action == Actions.LabReadResult)
+                credential.Url = string.Concat(credential.Url, "resultAPI.cgi?mode=fetchInbox&sessionkey=", credential.SessionKey, "&", filter);
 
             HttpResponseMessage? response = await _httpService.GetRequest(credential, action.ToString(), processedFilePath, filter);
 
