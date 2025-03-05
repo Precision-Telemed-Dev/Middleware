@@ -1,0 +1,17 @@
+~~~~~~~~~~~~ Generate Token ~~~~~~~~~~~~
+curl --location 'https://auth.neutron.health/oauth/token' \
+--header 'content-type: application/json' \
+--header 'Cookie: did=s%3Av0%3Adc51fe02-8b0f-4517-8d57-e55dddef1586.MU8mbR1155SvVKQTivCoUWAd9LNKX5Cg2HWahoRvz70; did_compat=s%3Av0%3Adc51fe02-8b0f-4517-8d57-e55dddef1586.MU8mbR1155SvVKQTivCoUWAd9LNKX5Cg2HWahoRvz70' \
+--data '{
+  "client_id":"xxxxx",
+  "client_secret":"xxxxx",
+  "audience":"https://api.neutron.health",
+  "grant_type":"client_credentials"
+}'
+
+
+~~~~~~~~~~~~ Order Creation ~~~~~~~~~~~~
+curl --location 'https://api.neutron.health/graphql' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer xxxxx' \
+--data '{"query":"mutation createOrder(\r\n    $externalId: ID\r\n    $patientId: ID!\r\n    $fills: [FillInput!]!\r\n    $address: AddressInput!\r\n    $pharmacyId: ID\r\n  ) {\r\n    createOrder(\r\n      externalId: $externalId\r\n      patientId: $patientId\r\n      fills: $fills\r\n      address: $address\r\n      pharmacyId: $pharmacyId\r\n    ) {\r\n      id\r\n    }\r\n  }","variables":{"patientId":"pat_01JJFE1Q8W98MQ7KBYRR43BXPQ","fills":[{"prescriptionId":"rx_01JMYC2XD8N82266FJ5DA8DXQ4"}],"pharmacyId":"phr_01HQD5F3C5M88JVNZWVVK9DTAE","address":{"street1":"123 Main St","postalCode":"11111","country":"USA","state":"NY","city":"Brooklyn"}}}'
